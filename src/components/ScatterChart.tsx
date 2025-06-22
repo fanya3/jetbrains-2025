@@ -11,25 +11,11 @@ import {
 } from "recharts"
 import { Box } from "@chakra-ui/react"
 import type { FC } from "react"
+import { LanguageData } from "../App"
 
-type Entry = {
-  category: string
-  value: number
-  metadata: {
-    Country: string
-    Experience: string
-    Language: string
-    Salary: string
-  }
-}
-
-type EntriesData = {
-  entries: Entry[]
-  yGroups: string[]
-}
 
 type SalaryScatterChartProps = {
-  entriesData: EntriesData
+  entriesData: LanguageData
 }
 
 type SeriesItem = {
@@ -70,7 +56,7 @@ const SalaryScatterChart: FC<SalaryScatterChartProps> = ({ entriesData }) => {
   const groupedData = chart.groupBy("id")
 
   return (
-    <Box width="100%" height="500px">
+    <Box width="100%" minHeight="500px">
       <Chart.Root chart={chart}>
         <ScatterChart margin={{ top: 20, right: 30, bottom: 5, left: 40 }} >
           <XAxis

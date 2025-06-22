@@ -4,13 +4,47 @@ import Title from './components/Title';
 import Card from './components/Card';
 import { Box, Flex, Portal, Select, createListCollection } from "@chakra-ui/react";
 import logoUrl from './assets/spirital-7a69e459de5e1b6afeb560734ebeffc4.svg';
-import calculatorData from './data/calculatorData.json';
-import SalaryScatterChart from './components/ScatterChart'
+import rawCalculatorData from './data/calculatorData.json';
+import SalaryScatterChart from './components/ScatterChart';
+
+// --- Types ---
+type Items = {
+  label: string;
+  value: string;
+};
+
+type Metadata = {
+  Country: string;
+  Language: string;
+  Experience: string;
+  Salary: string;
+};
+
+type Entry = {
+  value: number;
+  category: string;
+  metadata: Metadata;
+};
+
+export type LanguageData = {
+  entries: Entry[];
+  yGroups: string[]
+  xRange: string[]
+};
+
+type CalculatorData = {
+  [country: string]: {
+    [language: string]: LanguageData;
+  };
+};
+
+// --- Cast JSON with explicit type ---
+const calculatorData = rawCalculatorData as CalculatorData;
 
 function App() {
   // Extract countries and languages as list collections
   const allCountries = useMemo(() => {
-    const items = Object.keys(calculatorData).map((country, index) => ({
+    const items: Items[] = Object.keys(calculatorData).map(country => ({
       label: country,
       value: country,
     }));
@@ -19,10 +53,10 @@ function App() {
 
   const allLanguages = useMemo(() => {
     const langs = new Set<string>();
-    Object.values(calculatorData).forEach((country: any) => {
-      Object.keys(country).forEach(lang => langs.add(lang));
-    });
-    const items = Array.from(langs).map((lang) => ({
+    Object.values(calculatorData).forEach(country =>
+      Object.keys(country).forEach(lang => langs.add(lang))
+    );
+    const items: Items[] = Array.from(langs).map(lang => ({
       label: lang,
       value: lang,
     }));
@@ -30,22 +64,24 @@ function App() {
   }, []);
 
   // Always keep selectedCountry and selectedLanguage in sync with available options
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(allCountries.items[0].value || null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(allLanguages.items[0].value || null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(
+    allCountries.items?.[0]?.value ?? null
+  );
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(
+    allLanguages.items?.[0]?.value ?? null
+  );
 
-  const isReady =
-    allLanguages.items.length > 0 &&
-    allCountries.items.length > 0 &&
+  const isReady = Boolean(
+    allLanguages.items.length &&
+    allCountries.items.length &&
     selectedLanguage &&
     selectedCountry
+  );
 
   // Get entries for the selected country and language
-  const entriesData = useMemo(() => {
-    if (
-      selectedCountry &&
-      selectedLanguage  
-    ) {
-      return calculatorData[selectedCountry][selectedLanguage];
+  const entriesData  = useMemo(() => {
+    if (selectedCountry && selectedLanguage) {
+      return calculatorData[selectedCountry]?.[selectedLanguage] ?? [];
     }
     return [];
   }, [selectedCountry, selectedLanguage]);
@@ -72,39 +108,38 @@ function App() {
       </Flex>
 
       <Flex flexDirection={"row"} width={"100%"} gap={"20px"} marginTop={"50px"}>
-        <Card flex={1} number={1} title={"Enter your programming language, and country."}>
+        <Card flex={1} number={1} title={"Enter your programming language, and country."}>
           <Text size="11px" fontWeight={300}>
             Use our calculator to estimate your income potential based on software developer skills, programming language, location, and experience.
           </Text>
 
-          {isReady && selectedLanguage &&  (
+          {isReady && (
             <Box mt={4} width="100%">
               <Select.Root
                 collection={allLanguages}
-                onChange={(e) => {
-                  setSelectedLanguage( e.target.value as string)
+                onChange={(e: { target: { value: string; }; }) => {
+                  setSelectedLanguage( e?.target?.value as string)
                 }}
                 color="white"
-                selectedKey={selectedLanguage || allCountries?.items?.[0].value}
-                defaultValue={selectedLanguage}
+                selectedKey={selectedLanguage ?? undefined}
+                defaultValue={allCountries.items?.[0]?.value}
               >
                 <Select.HiddenSelect />
-                <Select.Label >Select programming language</Select.Label>
+                <Select.Label>Select programming language</Select.Label>
                 <Select.Control>
                   <Select.Trigger>
-                    <Select.ValueText placeholder={selectedLanguage || "Select programming language"} />
+                    <Select.ValueText placeholder={allLanguages.items?.[0]?.value || "Select programming language"} />
                   </Select.Trigger>
-                  <Select.IndicatorGroup  >
-                    <Select.Indicator  />
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
                   </Select.IndicatorGroup>
                 </Select.Control>
-
                 <Portal>
                   <Select.Positioner>
-                    <Select.Content >
-                      {allLanguages.items.map((item) => (
-                        <Select.Item key={item.value} item={item}  >
-                          <Select.ItemText >{item.label}</Select.ItemText>
+                    <Select.Content>
+                      {allLanguages.items.map((item: Items) => (
+                        <Select.Item key={item.value} item={item}>
+                          <Select.ItemText>{item.label}</Select.ItemText>
                         </Select.Item>
                       ))}
                     </Select.Content>
@@ -114,19 +149,19 @@ function App() {
 
               <Select.Root
                 collection={allCountries}
-                selectedKey={selectedCountry || allCountries?.items?.[0].value}
-                onChange={(e) => {
-                  setSelectedCountry( e.target.value as string)
+                onChange={(e: { target: { value: string; }; }) => {
+                  setSelectedCountry( e?.target?.value as string)
                 }}
                 color="white"
+                defaultValue={allCountries.items?.[0]?.value}
+                selectedKey={selectedCountry ?? undefined}
                 marginTop="10px"
-                 defaultValue={selectedCountry}
               >
                 <Select.HiddenSelect />
-                <Select.Label color="white">Select a country</Select.Label>
+                <Select.Label>Select a country</Select.Label>
                 <Select.Control>
                   <Select.Trigger>
-                    <Select.ValueText placeholder={selectedCountry || "Select country"} />
+                    <Select.ValueText placeholder={allCountries.items?.[0]?.value || "Select country"} />
                   </Select.Trigger>
                   <Select.IndicatorGroup>
                     <Select.Indicator />
@@ -135,7 +170,7 @@ function App() {
                 <Portal>
                   <Select.Positioner>
                     <Select.Content>
-                      {allCountries.items.map((item) => (
+                      {allCountries.items.map((item: Items) => (
                         <Select.Item key={item.value} item={item}>
                           <Select.ItemText>{item.label}</Select.ItemText>
                         </Select.Item>
@@ -159,7 +194,7 @@ function App() {
             gap="12px"
             width="100%"
           >
-            <SalaryScatterChart entriesData={entriesData} />
+            <SalaryScatterChart entriesData={entriesData as LanguageData} />
           </Box>
         </Card>
       </Flex>
