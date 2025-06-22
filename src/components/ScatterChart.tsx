@@ -39,7 +39,7 @@ const SalaryScatterChart: FC<SalaryScatterChartProps> = ({ entriesData }) => {
     id: entry.category,
     ...entry.metadata
   }))
-console.log("entriesData", entriesData)
+
   const series: SeriesItem[] = Array.from(
     new Set(transformedData.map((d) => d.id))
   ).map((category) => ({
@@ -56,7 +56,7 @@ console.log("entriesData", entriesData)
   const groupedData = chart.groupBy("id")
 
   return (
-    <Box width="100%" height="500px">
+    <Box width="100%" minHeight="500px">
       <Chart.Root chart={chart}>
         <ScatterChart margin={{ top: 20, right: 30, bottom: 5, left: 40 }} >
           <XAxis
