@@ -1,4 +1,5 @@
-# Getting Started with Create React App
+# jetbrains-2025
+Air Research Preview Program: home assignment task
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
