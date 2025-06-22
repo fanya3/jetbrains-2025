@@ -1,4 +1,4 @@
-import React, {  useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Text from './components/Text';
 import Title from './components/Title';
 import Card from './components/Card';
@@ -49,7 +49,7 @@ function App() {
     }
     return [];
   }, [selectedCountry, selectedLanguage]);
-console.log("entriesData", entriesData)
+
   return (
     <Box
       width="100%"
